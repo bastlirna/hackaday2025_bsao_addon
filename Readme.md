@@ -110,6 +110,12 @@ i2c1.writeto_mem(0x2c, 0x01, b'\x02')
 i2c1.writeto_mem(0x2c, 0x01, b'\x04')
 ```
 
+#### Set pixel color
+*This will disable animation*
+```
+i2c1.writeto_mem(0x2c, 0x02, b'\x01\xf0\xf0\xf0')
+```
+
 #### Get animation mode
 ```
 i2c1.readfrom_mem(0x2c, 0x01, 1)
