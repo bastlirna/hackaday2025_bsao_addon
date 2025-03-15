@@ -4,6 +4,8 @@ This repo contain some notes and code how to get live a Bendy SAO badge addon. A
 
 If you want to use this addon with your Hackaday 2025 badge, please look for details in our another [repo](https://github.com/bastlirna/hackaday2025_badge).
 
+I2C address is hardcoded to `0x2c`
+
 ## Flash ATtiny via UART converter
 
 You can use [Python MCU programmer](https://pypi.org/project/pymcuprog/) with any `USB to UART` converter.
@@ -15,7 +17,7 @@ You can use [Python MCU programmer](https://pypi.org/project/pymcuprog/) with an
 By default MCU uses 20MHz clock, for compatibility with Adafruit library needs to be switched to 16MHz. Be carefull, this can destroy your addon (if you do something wrong, you can lose access to programming interface). You can find details in [Atmel's datasheet](https://ww1.microchip.com/downloads/en/DeviceDoc/ATtiny3224-3226-3227-Data-Sheet-DS40002345A.pdf).
 
 ```
-pymcuprog write -d attiny3224 -t uart -u /dev/cu.usbserial-FTZ250XH1 -m fuses -o 2 -l 0x7D
+pymcuprog write -d attiny3224 -t uart -u /dev/usbdevice -m fuses -o 2 -l 0x7D
 ```
 
 #### Image write to flash
@@ -33,7 +35,7 @@ pymcuprog write -d attiny3224 -t uart -u /dev/usbdevice -f ./.pio/build/attiny32
 | get status     | 0x00        |
 | get/set_mode   | 0x01        |
 | set led collor | 0x02        |
-| i2cmd_reset    | 0x05        |
+| chop reset     | 0x05        |
 
 ### Error codes
 
@@ -64,21 +66,21 @@ pymcuprog write -d attiny3224 -t uart -u /dev/usbdevice -f ./.pio/build/attiny32
 
 ```
  0                 
- 0 1 2 3 4 5 6 7 8 
-+-+-+-+-+-+-+-+-+-+
-|     Mode ID     |
-+-+-+-+-+-+-+-+-+-+
+ 0 1 2 3 4 5 6 7
++-+-+-+-+-+-+-+-+
+|     Mode ID   |
++-+-+-+-+-+-+-+-+
 
 ```
 
 #### get status message
 
 ```
- 0                 1                  
- 0 1 2 3 4 5 6 7 8 0 1 2 3 4 5 6 7 8 
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-| Version | Reser.|   Error Id      |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0               1                  
+ 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7  
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| Vers. | Reser.|  Error Id     |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 ```
 
@@ -87,13 +89,13 @@ pymcuprog write -d attiny3224 -t uart -u /dev/usbdevice -f ./.pio/build/attiny32
 *Led position id can be from 0 to 11*
 
 ```
- 0                 1                  
- 0 1 2 3 4 5 6 7 8 0 1 2 3 4 5 6 7 8 
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|  LED pos. id  |  Red              |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|  Green        |  Blue             |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0               1                  
+ 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|  LED pos. id  |  Red          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|  Green        |  Blue         |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ```
 
 ### microPython examples 
