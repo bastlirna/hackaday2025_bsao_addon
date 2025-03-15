@@ -1,0 +1,124 @@
+# Bendy SAO a Hackaday 2025 badge addon
+
+This repo contain some notes and code how to get live a Bendy SAO badge addon. All work was done during the Hackaday 2025 conference in Berlin Please look at [https://hackaday.io/project/198408-bendy-sao](https://hackaday.io/project/198408-bendy-sao) for more details. 
+
+If you want to use this addon with your Hackaday 2025 badge, please look for details in our another [repo](https://github.com/bastlirna/hackaday2025_badge).
+
+## Flash ATtiny via UART converter
+
+You can use [Python MCU programmer](https://pypi.org/project/pymcuprog/) with any `USB to UART` converter.
+
+### Example commands
+
+#### Fuses:
+
+By default MCU uses 20MHz clock, for compatibility with Adafruit library needs to be switched to 16MHz. Be carefull, this can destroy your addon (if you do something wrong, you can lose access to programming interface). You can find details in [Atmel's datasheet](https://ww1.microchip.com/downloads/en/DeviceDoc/ATtiny3224-3226-3227-Data-Sheet-DS40002345A.pdf).
+
+```
+pymcuprog write -d attiny3224 -t uart -u /dev/cu.usbserial-FTZ250XH1 -m fuses -o 2 -l 0x7D
+```
+
+#### Image write to flash
+
+```
+pymcuprog write -d attiny3224 -t uart -u /dev/usbdevice -f ./.pio/build/attiny3224/firmware.hex --erase --verify
+```
+
+## Interfacing with addon via I2C
+
+### Memory (command) mapping
+
+| name           | address     |
+|----------------|-------------|
+| get status     | 0x00        |
+| get/set_mode   | 0x01        |
+| set led collor | 0x02        |
+| i2cmd_reset    | 0x05        |
+
+### Error codes
+
+| name             | code        |
+|------------------|-------------|
+| ok               | 0x00        |
+| message to short | 0xa0        |
+| message to long  | 0xa1        |
+| invalid data     | 0x10        |
+| unknown command  | 0xf0        |
+
+### Led animation modes
+
+*taken from [BendySAO's repository](https://github.com/geekmomprojects/BendySAO/blob/main/SuperConEurope2025/programming/strandtest_wheel_for_bendy_sao/strandtest_wheel_for_bendy_sao.ino)*
+
+| name                   | code     |
+|------------------------|----------|
+| none                   | 0        |
+| color wipe             | 1        |
+| theater chase          | 2        |
+| rainbow                | 3        |
+| rainbow cycle          | 4        |
+| theater chase rainbow  | 5        |
+
+### Message(s) structure
+
+#### set/get mode message
+
+```
+ 0                 
+ 0 1 2 3 4 5 6 7 8 
++-+-+-+-+-+-+-+-+-+
+|     Mode ID     |
++-+-+-+-+-+-+-+-+-+
+
+```
+
+#### get status message
+
+```
+ 0                 1                  
+ 0 1 2 3 4 5 6 7 8 0 1 2 3 4 5 6 7 8 
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| Version | Reser.|   Error Id      |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+```
+
+#### set led color message
+
+*Led position id can be from 0 to 11*
+
+```
+ 0                 1                  
+ 0 1 2 3 4 5 6 7 8 0 1 2 3 4 5 6 7 8 
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|  LED pos. id  |  Red              |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|  Green        |  Blue             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+```
+
+### microPython examples 
+*... for those who rule over the serpent's language ...*
+
+microPython I2C lib. doc. [here](https://docs.micropython.org/en/v1.15/library/machine.I2C.html)
+
+#### Set animation mode
+```
+i2c1.writeto_mem(0x2c, 0x01, b'\x02')
+. or .
+i2c1.writeto_mem(0x2c, 0x01, b'\x04')
+```
+
+#### Get animation mode
+```
+i2c1.readfrom_mem(0x2c, 0x01, 1)
+```
+
+#### Get device status
+```
+i2c1.readfrom_mem(0x2c, 0x00, 2)
+```
+
+## Acknowledgements
+
+[https://hackaday.io/project/198408-bendy-sao](https://hackaday.io/project/198408-bendy-sao)
+[https://github.com/geekmomprojects/BendySAO/tree/main](https://github.com/geekmomprojects/BendySAO/tree/main)
