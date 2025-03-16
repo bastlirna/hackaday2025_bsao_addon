@@ -4,7 +4,8 @@ This repo contain some notes and code how to get live a Bendy SAO badge addon. A
 
 If you want to use this addon with your Hackaday 2025 badge, please look for details in our another [repo](https://github.com/bastlirna/hackaday2025_badge).
 
-I2C address is hardcoded to `0x2c`
+> [!CAUTION]
+> There is neccessary to keep pins `GP1` and `GP2` in `log1` (higher than 0.7 × VDD => approx. more than 2.1 Volts). There is internal 20-50kOhm pull-up in addon chip, so if you connect just power, it will work well. But this also means, if you connect this addon to your Hackaton 2025 badge, then you need drive these pins in you badge to `log1`. In case when you drive these pins to low, addon will be held in reset mode.
 
 ![Bendy SAO addon photo](img/addon_1.png)
 
@@ -38,6 +39,8 @@ pymcuprog write -d attiny3224 -t uart -u /dev/usbdevice -f ./.pio/build/attiny32
 ```
 
 ## Interfacing with addon via I2C
+
+I2C address is hardcoded to `0x2c`
 
 ### Memory (command) mapping
 
