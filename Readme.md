@@ -6,13 +6,24 @@ If you want to use this addon with your Hackaday 2025 badge, please look for det
 
 I2C address is hardcoded to `0x2c`
 
-## Flash ATtiny via UART converter
+![Bendy SAO addon photo](img/addon_1.png)
+
+## Build
+
+You can build it by (PlatformIO)[https://platformio.org] (run `pio run` in this directory).
+
+## Flash (write code into) ATtiny via UART converter
 
 You can use [Python MCU programmer](https://pypi.org/project/pymcuprog/) with any `USB to UART` converter.
 
-### Example commands
+### Wiring
 
-#### Fuses:
+| UART to USB converter pin | Add-on pin     |
+|---------------------------|----------------|
+| TX                        | GP2            |
+| RX                        | GP1            |
+
+### Fuses:
 
 By default MCU uses 20MHz clock, for compatibility with Adafruit library needs to be switched to 16MHz. Be carefull, this can destroy your addon (if you do something wrong, you can lose access to programming interface). You can find details in [Atmel's datasheet](https://ww1.microchip.com/downloads/en/DeviceDoc/ATtiny3224-3226-3227-Data-Sheet-DS40002345A.pdf).
 
@@ -20,7 +31,7 @@ By default MCU uses 20MHz clock, for compatibility with Adafruit library needs t
 pymcuprog write -d attiny3224 -t uart -u /dev/usbdevice -m fuses -o 2 -l 0x7D
 ```
 
-#### Image write to flash
+### Image write to flash
 
 ```
 pymcuprog write -d attiny3224 -t uart -u /dev/usbdevice -f ./.pio/build/attiny3224/firmware.hex --erase --verify
@@ -129,4 +140,5 @@ i2c1.readfrom_mem(0x2c, 0x00, 2)
 ## Acknowledgements
 
 [https://hackaday.io/project/198408-bendy-sao](https://hackaday.io/project/198408-bendy-sao)
+
 [https://github.com/geekmomprojects/BendySAO/tree/main](https://github.com/geekmomprojects/BendySAO/tree/main)
